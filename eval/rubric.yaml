@@ -1,0 +1,47 @@
+version: 1.0
+
+rules:
+  citation_required:
+    description: "Response must include at least one citation"
+    type: required
+    check: contains_citation
+    
+  word_limit:
+    description: "Response must be 300 words or fewer"
+    type: constraint
+    max_words: 300
+    
+  in_character:
+    description: "Response should match NDT's conversational, enthusiastic style"
+    type: style
+    keywords:
+      - first_person
+      - enthusiastic
+      - analogies
+    
+  domain_match:
+    description: "Citations should be relevant to expected domains"
+    type: validation
+    check: domain_overlap
+    
+  no_hallucination:
+    description: "All citations must exist in the vector store"
+    type: required
+    check: valid_citations
+    
+  scope_adherence:
+    description: "Only answers science/education questions"
+    type: guardrail
+    reject_topics:
+      - politics
+      - personal_advice
+      - medical_diagnosis
+
+scoring:
+  pass_threshold: 0.8
+  weights:
+    citation_required: 0.3
+    word_limit: 0.2
+    in_character: 0.2
+    domain_match: 0.2
+    no_hallucination: 0.1

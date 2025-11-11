@@ -1,0 +1,26 @@
+# FastAPI Backend
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# RAG Stack
+langchain==0.1.0
+langchain-openai==0.0.2
+openai>=1.6.1,<2.0.0
+faiss-cpu==1.7.4
+sentence-transformers==2.2.2
+FlagEmbedding==1.2.10
+huggingface-hub>=0.15.0,<1.0.0
+
+# Document Processing
+pypdf==3.17.0
+trafilatura==1.6.2
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Utilities
+httpx==0.25.2
+tenacity==8.2.3
+pyyaml==6.0.1

@@ -1,0 +1,28 @@
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.isort]
+known-first-party = ["backend"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "-v --strict-markers"
+
+[tool.coverage.run]
+source = ["backend"]
+omit = ["backend/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
