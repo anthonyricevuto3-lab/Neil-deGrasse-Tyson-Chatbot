@@ -11,10 +11,10 @@ on:
 
 env:
   RESOURCE_GROUP: Neil-deGrasse-Tyson-Chatbot-RG
-  BACKEND_APP_NAME: ndt-backend-api
-  APP_SERVICE_PLAN: ASP-NeildeGrasseTysonChatbotRG-b379
+  BACKEND_CONTAINER_NAME: ndt-backend-api
   STATIC_WEB_APP_NAME: Neil-deGrasse-Tyson-Chatbot-WA
   BACKEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend:main
+  AZURE_LOCATION: westus
 
 jobs:
   deploy-backend:
@@ -28,59 +28,35 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Create or Update Backend Web App
+    - name: Deploy Backend to Azure Container Instances
       run: |
-        # Check if web app exists
-        if az webapp show --name ${{ env.BACKEND_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} 2>/dev/null; then
-          echo "Web app exists, updating..."
-          az webapp config container set \
-            --name ${{ env.BACKEND_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --docker-custom-image-name ${{ env.BACKEND_IMAGE }}
-        else
-          echo "Creating new web app..."
-          # Create web app with container image
-          az webapp create \
-            --name ${{ env.BACKEND_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --plan ${{ env.APP_SERVICE_PLAN }} \
-            --deployment-container-image-name ${{ env.BACKEND_IMAGE }} \
-            || true  # Continue even if there's a warning about AlwaysOn
-          
-          # Explicitly disable AlwaysOn and configure container
-          az webapp config set \
-            --name ${{ env.BACKEND_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --always-on false \
-            --linux-fx-version "DOCKER|${{ env.BACKEND_IMAGE }}"
-        fi
-        
-        # Configure web app settings
-        az webapp config appsettings set \
-          --name ${{ env.BACKEND_APP_NAME }} \
+        echo "Deploying backend container..."
+        az container create \
           --resource-group ${{ env.RESOURCE_GROUP }} \
-          --settings \
+          --name ${{ env.BACKEND_CONTAINER_NAME }} \
+          --image ${{ env.BACKEND_IMAGE }} \
+          --cpu 1 \
+          --memory 1.5 \
+          --ports 8000 \
+          --dns-name-label ${{ env.BACKEND_CONTAINER_NAME }} \
+          --environment-variables \
             OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
-            WEBSITES_PORT=8000 \
-            SCM_DO_BUILD_DURING_DEPLOYMENT=false \
-            DOCKER_REGISTRY_SERVER_URL=https://ghcr.io
-        
-        # Enable container logging
-        az webapp log config \
-          --name ${{ env.BACKEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --docker-container-logging filesystem
+          --restart-policy Always \
+          --location ${{ env.AZURE_LOCATION }} \
+          || az container restart \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.BACKEND_CONTAINER_NAME }}
     
     - name: Get Backend URL
       id: backend-url
       run: |
-        BACKEND_URL=$(az webapp show \
-          --name ${{ env.BACKEND_APP_NAME }} \
+        BACKEND_FQDN=$(az container show \
           --resource-group ${{ env.RESOURCE_GROUP }} \
-          --query defaultHostName \
+          --name ${{ env.BACKEND_CONTAINER_NAME }} \
+          --query ipAddress.fqdn \
           --output tsv)
-        echo "url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
-        echo "✅ Backend deployed to: https://$BACKEND_URL"
+        echo "url=http://$BACKEND_FQDN:8000" >> $GITHUB_OUTPUT
+        echo "✅ Backend deployed to: http://$BACKEND_FQDN:8000"
     
     outputs:
       backend-url: ${{ steps.backend-url.outputs.url }}
