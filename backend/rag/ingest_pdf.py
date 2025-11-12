@@ -2,7 +2,6 @@
 
 import argparse
 from pathlib import Path
-from typing import List
 
 from pypdf import PdfReader
 
@@ -22,21 +21,21 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
 def ingest_pdf(
     pdf_path: Path,
     source_name: str | None = None,
-) -> List[dict]:
+) -> list[dict]:
     """Ingest a single PDF file."""
     if source_name is None:
         source_name = pdf_path.stem
-    
+
     print(f"Ingesting PDF: {pdf_path}")
     text = extract_text_from_pdf(pdf_path)
-    
+
     # Split into chunks with attribution
     chunks = split_with_attribution(
         text=text,
         source=source_name,
         metadata={"file_path": str(pdf_path)},
     )
-    
+
     print(f"Created {len(chunks)} chunks")
     return chunks
 
@@ -47,12 +46,12 @@ def ingest_pdf_directory(
 ) -> None:
     """Ingest all PDFs in a directory."""
     pdf_files = list(input_dir.glob("*.pdf"))
-    
+
     all_chunks = []
     for pdf_file in pdf_files:
         chunks = ingest_pdf(pdf_file)
         all_chunks.extend(chunks)
-    
+
     # Add to vector store
     print(f"Adding {len(all_chunks)} total chunks to store...")
     add_to_store(all_chunks, output_dir)
@@ -64,7 +63,7 @@ def main():
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
-    
+
     ingest_pdf_directory(args.input_dir, args.output_dir)
 
 

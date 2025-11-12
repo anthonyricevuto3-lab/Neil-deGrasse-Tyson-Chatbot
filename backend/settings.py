@@ -1,7 +1,6 @@
 """Application settings using Pydantic."""
 
 from functools import lru_cache
-from typing import List
 
 from pydantic_settings import BaseSettings
 
@@ -30,7 +29,7 @@ class Settings(BaseSettings):
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:5173"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
     # Logging
     log_level: str = "INFO"
@@ -44,7 +43,7 @@ class Settings(BaseSettings):
         case_sensitive = False
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()

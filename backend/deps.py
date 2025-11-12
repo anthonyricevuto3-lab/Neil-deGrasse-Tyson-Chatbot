@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from backend.settings import get_settings
 
 
-@lru_cache()
+@lru_cache
 def get_llm() -> ChatOpenAI:
     """Get cached LLM client."""
     settings = get_settings()
@@ -18,7 +18,7 @@ def get_llm() -> ChatOpenAI:
     )
 
 
-@lru_cache()
+@lru_cache
 def get_embeddings() -> OpenAIEmbeddings:
     """Get cached embeddings client."""
     settings = get_settings()

@@ -3,24 +3,24 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def log_request(endpoint: str, data: Dict[str, Any]) -> None:
+def log_request(endpoint: str, data: dict[str, Any]) -> None:
     """Log API request (PII-safe)."""
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
         "endpoint": endpoint,
         "data_summary": {
             "message_length": len(data.get("message", "")),
-        }
+        },
     }
     logger.info(json.dumps(log_entry))
 
 
-def log_response(endpoint: str, response: Dict[str, Any], duration_ms: float) -> None:
+def log_response(endpoint: str, response: dict[str, Any], duration_ms: float) -> None:
     """Log API response (PII-safe)."""
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -29,7 +29,7 @@ def log_response(endpoint: str, response: Dict[str, Any], duration_ms: float) ->
         "response_summary": {
             "answer_length": len(response.get("answer", "")),
             "num_sources": len(response.get("sources", [])),
-        }
+        },
     }
     logger.info(json.dumps(log_entry))
 

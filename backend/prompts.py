@@ -63,8 +63,23 @@ Respond with only "ACCEPT" or "REJECT"."""
 
 # Allowed topic keywords for fast scope checking
 ALLOWED_TOPICS = [
-    "astronomy", "astrophysics", "cosmology", "space", "physics",
-    "science", "universe", "star", "planet", "galaxy", "cosmic",
-    "quantum", "relativity", "gravity", "black hole", "evolution",
-    "scientific method", "science communication", "telescope",
+    "astronomy",
+    "astrophysics",
+    "cosmology",
+    "space",
+    "physics",
+    "science",
+    "universe",
+    "star",
+    "planet",
+    "galaxy",
+    "cosmic",
+    "quantum",
+    "relativity",
+    "gravity",
+    "black hole",
+    "evolution",
+    "scientific method",
+    "science communication",
+    "telescope",
 ]

@@ -16,7 +16,7 @@ router = APIRouter()
 async def chat_endpoint(request: ChatRequest) -> ChatResponse:
     """
     Chat endpoint with RAG pipeline.
-    
+
     1. Check scope/guardrails
     2. Retrieve relevant context
     3. Generate response with LLM
@@ -24,23 +24,22 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
     """
     # Log request
     log_request("chat", {"message": request.message})
-    
+
     # Check scope
     if not check_scope(request.message):
         raise HTTPException(
-            status_code=400,
-            detail="Question is outside NDT's scope (science/education only)"
+            status_code=400, detail="Question is outside NDT's scope (science/education only)"
         )
-    
+
     # Run RAG pipeline
     context = await rag_pipeline(request.message)
-    
+
     # Generate response
     response = await generate_response(
         question=request.message,
         context=context,
     )
-    
+
     return ChatResponse(
         response=response["answer"],
         sources=response["sources"],
@@ -51,16 +50,16 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
 @router.post("/chat/stream")
 async def chat_stream_endpoint(request: ChatRequest):
     """Streaming chat endpoint (SSE)."""
-    
+
     async def generate():
         # Check scope
         if not check_scope(request.message):
-            yield f"data: {{'error': 'Out of scope'}}\n\n"
+            yield "data: {'error': 'Out of scope'}\n\n"
             return
-        
+
         # Run RAG pipeline
         context = await rag_pipeline(request.message)
-        
+
         # Stream response
         async for chunk in generate_response(
             question=request.message,
@@ -68,5 +67,5 @@ async def chat_stream_endpoint(request: ChatRequest):
             stream=True,
         ):
             yield f"data: {chunk}\n\n"
-    
+
     return StreamingResponse(generate(), media_type="text/event-stream")

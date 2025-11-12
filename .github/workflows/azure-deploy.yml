@@ -1,0 +1,129 @@
+name: Deploy to Azure Container Apps
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker/**'
+      - '.github/workflows/azure-deploy.yml'
+
+env:
+  AZURE_CONTAINER_REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend
+  FRONTEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/frontend
+  RESOURCE_GROUP: ndt-chatbot-rg
+  BACKEND_APP_NAME: ndt-backend
+  FRONTEND_APP_NAME: ndt-frontend
+  LOCATION: eastus
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy Backend to Azure Container Apps
+      run: |
+        # Create resource group if it doesn't exist
+        az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }} || true
+        
+        # Create container app environment if it doesn't exist
+        az containerapp env create \
+          --name ndt-env \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --location ${{ env.LOCATION }} || true
+        
+        # Deploy backend container app
+        az containerapp create \
+          --name ${{ env.BACKEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ndt-env \
+          --image ${{ env.BACKEND_IMAGE }}:main \
+          --target-port 8000 \
+          --ingress external \
+          --registry-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          --env-vars \
+            OPENAI_API_KEY=secretref:openai-api-key \
+          --cpu 1.0 \
+          --memory 2.0Gi \
+          --min-replicas 1 \
+          --max-replicas 3 \
+          --secrets \
+            openai-api-key=${{ secrets.OPENAI_API_KEY }} \
+          --query properties.configuration.ingress.fqdn \
+          --output tsv || \
+        az containerapp update \
+          --name ${{ env.BACKEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.BACKEND_IMAGE }}:main
+    
+    - name: Get Backend URL
+      id: backend-url
+      run: |
+        BACKEND_URL=$(az containerapp show \
+          --name ${{ env.BACKEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query properties.configuration.ingress.fqdn \
+          --output tsv)
+        echo "url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
+        echo "Backend URL: https://$BACKEND_URL"
+    
+    outputs:
+      backend-url: ${{ steps.backend-url.outputs.url }}
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy Frontend to Azure Container Apps
+      run: |
+        # Deploy frontend container app
+        az containerapp create \
+          --name ${{ env.FRONTEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --environment ndt-env \
+          --image ${{ env.FRONTEND_IMAGE }}:main \
+          --target-port 80 \
+          --ingress external \
+          --registry-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          --env-vars \
+            VITE_API_URL=${{ needs.deploy-backend.outputs.backend-url }} \
+          --cpu 0.5 \
+          --memory 1.0Gi \
+          --min-replicas 1 \
+          --max-replicas 2 \
+          --query properties.configuration.ingress.fqdn \
+          --output tsv || \
+        az containerapp update \
+          --name ${{ env.FRONTEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.FRONTEND_IMAGE }}:main \
+          --set-env-vars \
+            VITE_API_URL=${{ needs.deploy-backend.outputs.backend-url }}
+    
+    - name: Get Frontend URL
+      run: |
+        FRONTEND_URL=$(az containerapp show \
+          --name ${{ env.FRONTEND_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --query properties.configuration.ingress.fqdn \
+          --output tsv)
+        echo "🚀 Frontend deployed to: https://$FRONTEND_URL"
+        echo "🔗 Backend API: ${{ needs.deploy-backend.outputs.backend-url }}"
