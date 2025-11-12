@@ -39,17 +39,20 @@ jobs:
             --docker-custom-image-name ${{ env.BACKEND_IMAGE }}
         else
           echo "Creating new web app..."
+          # Create web app with container image
           az webapp create \
             --name ${{ env.BACKEND_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --plan ${{ env.APP_SERVICE_PLAN }} \
-            --deployment-container-image-name ${{ env.BACKEND_IMAGE }}
+            --deployment-container-image-name ${{ env.BACKEND_IMAGE }} \
+            || true  # Continue even if there's a warning about AlwaysOn
           
-          # Disable AlwaysOn for Free/Basic tier
+          # Explicitly disable AlwaysOn and configure container
           az webapp config set \
             --name ${{ env.BACKEND_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --always-on false
+            --always-on false \
+            --linux-fx-version "DOCKER|${{ env.BACKEND_IMAGE }}"
         fi
         
         # Configure web app settings
