@@ -44,6 +44,12 @@ jobs:
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --plan ${{ env.APP_SERVICE_PLAN }} \
             --deployment-container-image-name ${{ env.BACKEND_IMAGE }}
+          
+          # Disable AlwaysOn for Free/Basic tier
+          az webapp config set \
+            --name ${{ env.BACKEND_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --always-on false
         fi
         
         # Configure web app settings
