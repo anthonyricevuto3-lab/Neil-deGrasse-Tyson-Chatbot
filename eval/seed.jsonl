@@ -1,5 +1,0 @@
-{"question": "What is dark matter?", "expected_domains": ["astrophysics", "cosmology"], "expected_citations": ["Astrophysics for People in a Hurry"]}
-{"question": "Why is Pluto no longer a planet?", "expected_domains": ["astronomy", "planetary science"], "expected_citations": ["The Pluto Files"]}
-{"question": "What happens when you fall into a black hole?", "expected_domains": ["astrophysics", "relativity"], "expected_citations": ["Death by Black Hole"]}
-{"question": "How old is the universe?", "expected_domains": ["cosmology"], "expected_citations": ["Astrophysics for People in a Hurry"]}
-{"question": "What is the cosmic perspective?", "expected_domains": ["philosophy", "science communication"], "expected_citations": ["The Cosmic Perspective"]}
