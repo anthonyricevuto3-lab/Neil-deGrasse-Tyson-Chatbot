@@ -1,5 +1,8 @@
 FROM node:20-alpine AS builder
 
+# Bust cache
+ARG CACHEBUST=1
+
 WORKDIR /app
 
 # Install dependencies
