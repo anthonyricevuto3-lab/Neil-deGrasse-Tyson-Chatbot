@@ -50,7 +50,6 @@ jobs:
           --image ${{ env.BACKEND_IMAGE }}:main \
           --target-port 8000 \
           --ingress external \
-          --registry-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
           --env-vars \
             OPENAI_API_KEY=secretref:openai-api-key \
           --cpu 1.0 \
