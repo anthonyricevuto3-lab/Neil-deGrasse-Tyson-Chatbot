@@ -36,6 +36,9 @@ jobs:
           --name ${{ env.BACKEND_CONTAINER_NAME }} \
           --image ${{ env.BACKEND_IMAGE }} \
           --os-type Linux \
+          --registry-login-server ghcr.io \
+          --registry-username ${{ github.actor }} \
+          --registry-password ${{ secrets.GITHUB_TOKEN }} \
           --cpu 1 \
           --memory 1.5 \
           --ports 8000 \
