@@ -42,7 +42,7 @@ jobs:
           --resource-group ${{ env.RESOURCE_GROUP }} \
           --location ${{ env.LOCATION }} || true
         
-        # Deploy backend container app
+        # Deploy backend container app with registry credentials
         az containerapp create \
           --name ${{ env.BACKEND_APP_NAME }} \
           --resource-group ${{ env.RESOURCE_GROUP }} \
@@ -50,6 +50,9 @@ jobs:
           --image ${{ env.BACKEND_IMAGE }}:main \
           --target-port 8000 \
           --ingress external \
+          --registry-server ghcr.io \
+          --registry-username ${{ github.actor }} \
+          --registry-password ${{ secrets.GITHUB_TOKEN }} \
           --env-vars \
             OPENAI_API_KEY=secretref:openai-api-key \
           --cpu 1.0 \
