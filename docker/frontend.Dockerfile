@@ -2,9 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install dependencies
 COPY frontend/package*.json ./
 RUN npm ci
 
+# Build application
 COPY frontend/ .
 RUN npm run build
 
