@@ -31,6 +31,18 @@ jobs:
     - name: Deploy Backend to Azure Container Instances
       run: |
         echo "Deploying backend container..."
+        
+        # Delete existing container if in transitioning state
+        az container delete \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.BACKEND_CONTAINER_NAME }} \
+          --yes \
+          || echo "No existing container to delete"
+        
+        # Wait a moment for cleanup
+        sleep 10
+        
+        # Create new container
         az container create \
           --resource-group ${{ env.RESOURCE_GROUP }} \
           --name ${{ env.BACKEND_CONTAINER_NAME }} \
@@ -46,10 +58,7 @@ jobs:
           --environment-variables \
             OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
           --restart-policy Always \
-          --location ${{ env.AZURE_LOCATION }} \
-          || az container restart \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --name ${{ env.BACKEND_CONTAINER_NAME }}
+          --location ${{ env.AZURE_LOCATION }}
     
     - name: Get Backend URL
       id: backend-url
