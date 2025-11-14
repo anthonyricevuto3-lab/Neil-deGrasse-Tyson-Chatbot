@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { chatAPI } from '../lib/api'
+import { chatAPI } from '../lib/api.js'
 
 export function useChat() {
   const [isLoading, setIsLoading] = useState(false)
