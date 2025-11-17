@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { chatAPI } from '../lib/api'
+
 
 export function useChat() {
   const [isLoading, setIsLoading] = useState(false)
 
+
+  // Placeholder sendMessage function (removes dependency on missing api.ts)
   const sendMessage = async (message: string) => {
     setIsLoading(true)
     try {
-      const response = await chatAPI.sendMessage(message)
-      return response
+      // Simulate a response
+      return {
+        response: `Echo: ${message}`,
+        sources: []
+      }
     } finally {
       setIsLoading(false)
     }
