@@ -14,7 +14,7 @@ env:
   AZURE_CONTAINER_REGISTRY: ghcr.io
   BACKEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend
   FRONTEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/frontend
-  RESOURCE_GROUP: Neil-deGrasse-Tyson-Chatbot-RG
+  RESOURCE_GROUP: neil-degrasse-tyson-chatbot-rg
   BACKEND_APP_NAME: ndt-backend
   FRONTEND_APP_NAME: ndt-frontend
   LOCATION: westus

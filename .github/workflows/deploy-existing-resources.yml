@@ -10,9 +10,9 @@ on:
       - '.github/workflows/deploy-existing-resources.yml'
 
 env:
-  RESOURCE_GROUP: Neil-deGrasse-Tyson-Chatbot-RG
+  RESOURCE_GROUP: neil-degrasse-tyson-chatbot-rg
   BACKEND_CONTAINER_NAME: ndt-backend-api
-  STATIC_WEB_APP_NAME: Neil-deGrasse-Tyson-Chatbot-WA
+  STATIC_WEB_APP_NAME: neil-degrasse-tyson-chatbot-wa
   BACKEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend:main
   AZURE_LOCATION: westus
 
