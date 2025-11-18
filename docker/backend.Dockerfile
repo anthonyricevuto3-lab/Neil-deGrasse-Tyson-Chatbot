@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Copy application
 COPY backend/ ./backend/
-COPY data/ ./data/
 
 # Create storage directory (vector store will be built on first run)
 RUN mkdir -p storage/vector_store
