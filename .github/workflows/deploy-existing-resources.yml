@@ -96,14 +96,7 @@ jobs:
         npm ci
         npm run build
     
-    - name: Deploy to Static Web App
-      uses: Azure/static-web-apps-deploy@v1
-      with:
-        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        action: "upload"
-        app_location: "/frontend/dist"
-        skip_app_build: true
+    # Removed duplicate Static Web App deployment to avoid conflicts. Use only the main azure-static-web-apps.yml for SWA deployment.
     
     - name: Get Frontend URL
       run: |
