@@ -10,8 +10,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
-  IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
+  IMAGE_NAME_BACKEND: anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend
+  IMAGE_NAME_FRONTEND: anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/frontend
 
 jobs:
   build-and-push:
