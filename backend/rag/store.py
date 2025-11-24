@@ -10,7 +10,7 @@ from backend.deps import get_embeddings
 _vector_store_cache = None
 
 
-def load_store(store_path: Path, use_cache: bool = True) -> FAISS:
+def load_store(store_path: Path, use_cache: bool = True) -> FAISS | None:
     """
     Load existing FAISS store with caching.
 
@@ -19,13 +19,17 @@ def load_store(store_path: Path, use_cache: bool = True) -> FAISS:
         use_cache: Use cached store (default True for performance)
 
     Returns:
-        FAISS vector store
+        FAISS vector store or None if not found
     """
     global _vector_store_cache
 
     # Return cached store if available
     if use_cache and _vector_store_cache is not None:
         return _vector_store_cache
+
+    # Check if vector store exists
+    if not (store_path / "index.faiss").exists():
+        return None
 
     embeddings = get_embeddings()
     try:
@@ -41,6 +45,9 @@ def load_store(store_path: Path, use_cache: bool = True) -> FAISS:
             str(store_path),
             embeddings,
         )
+    except Exception as e:
+        print(f"Error loading vector store: {e}")
+        return None
 
     # Cache for future requests
     if use_cache:

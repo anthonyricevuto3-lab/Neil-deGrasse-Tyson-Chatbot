@@ -21,6 +21,10 @@ async def retrieve_documents(query: str, top_k: int | None = None) -> list[dict]
     # Load vector store (now cached globally)
     store = load_store(Path(settings.vector_store_path))
 
+    # Return empty list if no vector store
+    if store is None:
+        return []
+
     # Search
     results = store.similarity_search_with_score(query, k=k)
 
