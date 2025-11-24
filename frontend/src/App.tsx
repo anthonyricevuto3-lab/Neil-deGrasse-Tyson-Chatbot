@@ -1,11 +1,8 @@
 
 import Chat from './components/Chat'
 import './styles/App.css'
-import { useAuth } from './hooks/useAuth'
 
 function App() {
-  const { user, loading, login, logout } = useAuth()
-
   return (
     <div className="app space-bg">
       <div className="starfield"></div>
@@ -24,17 +21,8 @@ function App() {
             <p className="header-quote">"The universe is under no obligation to make sense to you."</p>
           </div>
           <div className="status-indicator">
-            {loading ? (
-              <span>Loading...</span>
-            ) : user ? (
-              <>
-                <span className="status-dot"></span>
-                <span>Signed in as {user.userDetails}</span>
-                <button onClick={logout} className="auth-button">Logout</button>
-              </>
-            ) : (
-              <button onClick={login} className="auth-button">Sign in with Microsoft</button>
-            )}
+            <span className="status-dot"></span>
+            <span>Ready</span>
           </div>
         </div>
       </header>
