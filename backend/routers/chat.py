@@ -1,6 +1,7 @@
 """Chat endpoint with RAG pipeline."""
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 
 from backend.models.schemas import ChatRequest, ChatResponse
@@ -11,6 +12,20 @@ from backend.services.telemetry import log_request
 
 router = APIRouter()
 
+
+@router.get("/chat")
+async def chat_get_help():
+    """Helper for accidental GET requests to /chat.
+
+    Returns guidance on how to use the POST /chat endpoint.
+    """
+    return JSONResponse(
+        {
+            "detail": "Use POST /chat with JSON body {'message': '<your question>'}",
+            "example": {"message": "What is a neutron star?"},
+            "schema": {"message": "string"},
+        }
+    )
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest) -> ChatResponse:
