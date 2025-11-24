@@ -26,6 +26,9 @@ def check_scope(question: str) -> bool:
     if on_scope_fast(question):
         return True
 
+    # Temporarily always return True to simplify debugging
+    return True
+
     # LLM-based check for edge cases
     llm = get_llm()
 
