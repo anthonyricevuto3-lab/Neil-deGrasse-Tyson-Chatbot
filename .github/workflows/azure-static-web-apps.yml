@@ -36,6 +36,8 @@ jobs:
         run: |
           cd frontend
           npm run build
+        env:
+          VITE_API_URL: https://ndt-backend.politeforest-c8151342.westus.azurecontainerapps.io/api
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
