@@ -158,6 +158,29 @@ body, html {
   50% { opacity: 0.5; }
 }
 
+.auth-button {
+  background: linear-gradient(135deg, #2d2dff 0%, #7df9ff 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(45, 45, 255, 0.3);
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(125, 249, 255, 0.5);
+  background: linear-gradient(135deg, #7df9ff 0%, #2d2dff 100%);
+}
+
 .app-main {
   flex: 1;
   display: flex;
