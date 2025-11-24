@@ -22,29 +22,37 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
     3. Generate response with LLM
     4. Validate and return
     """
-    # Log request
-    log_request("chat", {"message": request.message})
+    try:
+        # Log request
+        log_request("chat", {"message": request.message})
 
-    # Check scope
-    if not check_scope(request.message):
-        raise HTTPException(
-            status_code=400, detail="Question is outside NDT's scope (science/education only)"
+        # Check scope
+        if not check_scope(request.message):
+            raise HTTPException(
+                status_code=400, detail="Question is outside NDT's scope (science/education only)"
+            )
+
+        # Run RAG pipeline
+        context = await rag_pipeline(request.message)
+
+        # Generate response
+        response = await generate_response(
+            question=request.message,
+            context=context,
         )
 
-    # Run RAG pipeline
-    context = await rag_pipeline(request.message)
-
-    # Generate response
-    response = await generate_response(
-        question=request.message,
-        context=context,
-    )
-
-    return ChatResponse(
-        response=response["answer"],
-        sources=response["sources"],
-        metadata=response.get("metadata", {}),
-    )
+        return ChatResponse(
+            response=response["answer"],
+            sources=response["sources"],
+            metadata=response.get("metadata", {}),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in chat endpoint: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.post("/chat/stream")
