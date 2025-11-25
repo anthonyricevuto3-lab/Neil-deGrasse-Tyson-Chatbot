@@ -54,8 +54,8 @@ function App() {
             </div>
           </div>
           <nav className="app-nav">
-            <Link to="/" className="nav-link">Chat</Link>
-            <Link to="/sources" className="nav-link">Sources ({sources.length})</Link>
+            <Link to="/" className="nav-link">💬 Chat</Link>
+            <Link to="/sources" className="nav-link">📚 Sources ({sources.length})</Link>
           </nav>
         </header>
         <main className="app-main">

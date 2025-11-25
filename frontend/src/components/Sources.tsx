@@ -8,16 +8,16 @@ export default function Sources({ sources }: SourcesProps) {
   if (!sources || sources.length === 0) {
     return (
       <div className="sources-container space-glass">
-        <h2>📚 Sources</h2>
-        <p>No sources collected yet. Ask questions to build the knowledge reference list.</p>
+        <h2>📚 Training Sources</h2>
+        <p>Loading sources used to train the AI...</p>
       </div>
     )
   }
 
   return (
     <div className="sources-container space-glass">
-      <h2>📚 Referenced Sources</h2>
-      <p>The chatbot draws from these URLs (interviews, transcripts, articles). They are aggregated from responses but omitted inline for conversational flow.</p>
+      <h2>📚 Training Sources ({sources.length})</h2>
+      <p>The AI was trained on these URLs containing Neil deGrasse Tyson's interviews, transcripts, articles, and talks. All responses are grounded in this knowledge base.</p>
       <ul className="sources-list">
         {sources.map(src => (
           <li key={src}>
