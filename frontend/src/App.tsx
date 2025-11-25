@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Chat from './components/Chat'
 import Sources from './components/Sources'
@@ -15,6 +15,20 @@ function App() {
       return Array.from(merged)
     })
   }
+
+  // Fetch all sources from backend on mount
+  useEffect(() => {
+    const apiBase = import.meta.env.VITE_API_URL || ''
+    if (!apiBase) return
+    fetch(`${apiBase}/sources`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && Array.isArray(data.sources)) {
+          setSources(prev => Array.from(new Set([...data.sources, ...prev])))
+        }
+      })
+      .catch(err => console.error('Failed to load sources list', err))
+  }, [])
 
   return (
     <BrowserRouter>
