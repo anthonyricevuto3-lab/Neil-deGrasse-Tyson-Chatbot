@@ -29,7 +29,11 @@ class Settings(BaseSettings):
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    cors_origins: list[str] = [
+        "http://localhost:3000", 
+        "http://localhost:5173",
+        "https://polite-sand-06dd6b31e.3.azurestaticapps.net"
+    ]
 
     # Logging
     log_level: str = "INFO"
