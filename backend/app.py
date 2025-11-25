@@ -11,7 +11,7 @@ settings = get_settings()
 app = FastAPI(
     title="NDT Bot API",
     description="RAG-powered chatbot in the style of Neil deGrasse Tyson",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 # CORS middleware
