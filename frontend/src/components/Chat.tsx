@@ -9,7 +9,11 @@ interface ChatMessage {
   sources?: string[]
 }
 
-export default function Chat() {
+interface ChatProps {
+  onNewSources?: (sources: string[]) => void
+}
+
+export default function Chat({ onNewSources }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const { sendMessage, isLoading } = useChat()
@@ -34,6 +38,11 @@ export default function Chat() {
         role: 'assistant',
         content: response.response,
         sources: response.sources
+      }
+
+      // Aggregate sources externally without showing them inline
+      if (onNewSources && response.sources && response.sources.length > 0) {
+        onNewSources(response.sources)
       }
 
       setMessages(prev => [...prev, assistantMessage])

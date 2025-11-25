@@ -1,8 +1,21 @@
 
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Chat from './components/Chat'
+import Sources from './components/Sources'
 import './styles/App.css'
 
 function App() {
+  const [sources, setSources] = useState<string[]>([])
+
+  const addSources = (incoming: string[]) => {
+    setSources(prev => {
+      const merged = new Set(prev)
+      incoming.forEach(s => merged.add(s))
+      return Array.from(merged)
+    })
+  }
+
   return (
     <div className="app space-bg">
       <div className="starfield"></div>
@@ -25,9 +38,18 @@ function App() {
             <span>Ready</span>
           </div>
         </div>
+        <nav className="app-nav">
+          <Link to="/" className="nav-link">Chat</Link>
+          <Link to="/sources" className="nav-link">Sources ({sources.length})</Link>
+        </nav>
       </header>
       <main className="app-main">
-        <Chat />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Chat onNewSources={addSources} />} />
+            <Route path="/sources" element={<Sources sources={sources} />} />
+          </Routes>
+        </BrowserRouter>
       </main>
       <footer className="app-footer space-glass">
         <p>🌌 Powered by RAG • All responses grounded in NDT's writings and interviews</p>
