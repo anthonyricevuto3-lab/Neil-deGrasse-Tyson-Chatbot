@@ -13,6 +13,7 @@ _vector_store_cache = None
 
 # Azure Blob Storage URLs for vector store files
 BLOB_BASE_URL = "https://ndtchatbotstorage.blob.core.windows.net/vectorstore"
+BLOB_SAS_TOKEN = "se=2025-12-03T06%3A57%3A07Z&sp=r&sv=2022-11-02&sr=c&sig=nEP3OCnGRIgVW9llRSPaPTNSOEzGVIrM5bgmePqTLQ4%3D"
 VECTOR_STORE_FILES = ["index.faiss", "index.pkl"]
 
 
@@ -24,7 +25,7 @@ def _download_vector_store_from_blob(store_path: Path) -> bool:
         for filename in VECTOR_STORE_FILES:
             local_file = store_path / filename
             if not local_file.exists():
-                blob_url = f"{BLOB_BASE_URL}/{filename}"
+                blob_url = f"{BLOB_BASE_URL}/{filename}?{BLOB_SAS_TOKEN}"
                 print(f"Downloading {filename} from Azure Blob Storage...")
                 urlretrieve(blob_url, local_file)
                 print(f"Downloaded {filename} successfully")
