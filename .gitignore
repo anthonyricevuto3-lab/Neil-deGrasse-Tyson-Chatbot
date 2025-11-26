@@ -29,9 +29,6 @@ wheels/
 .env
 .env.local
 
-# Vector store
-storage/vector_store/
-
 # Cache
 data/cache/
 
