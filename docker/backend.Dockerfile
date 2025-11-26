@@ -16,8 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application
 COPY backend/ ./backend/
 
-# Create storage directory (vector store will be built on first run)
-RUN mkdir -p storage/vector_store
+# Copy vector store data
+COPY storage/vector_store/ ./storage/vector_store/
 
 EXPOSE 8000
 
