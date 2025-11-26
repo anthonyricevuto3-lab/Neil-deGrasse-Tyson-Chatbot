@@ -3,6 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
+# Force rebuild: 2025-11-25-21:15
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
