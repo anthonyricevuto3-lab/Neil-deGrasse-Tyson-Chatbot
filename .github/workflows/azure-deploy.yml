@@ -142,31 +142,32 @@ jobs:
           echo "ACR_USERNAME=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"username\" -o tsv)" >> "$GITHUB_ENV"
           echo "ACR_PASSWORD=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"passwords[0].value\" -o tsv)" >> "$GITHUB_ENV"
 
-      - name: Deploy Frontend
+      - name: Remove old registries from frontend app
         run: |
           set -e
-          az containerapp create \
+          # Remove all registries except ACR to break any GHCR link
+          az containerapp registry list \
+            --name "${{ env.FRONTEND_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" -o tsv | awk '{print $1}' | while read reg; do
+            if [ "$reg" != "${{ env.AZURE_CONTAINER_REGISTRY }}" ]; then
+              az containerapp registry remove \
+                --name "${{ env.FRONTEND_APP_NAME }}" \
+                --resource-group "${{ env.RESOURCE_GROUP }}" \
+                --server "$reg" || true
+            fi
+          done
+
+      - name: Deploy Frontend (force ACR image)
+        run: |
+          set -e
+          az containerapp registry set \
             --name "${{ env.FRONTEND_APP_NAME }}" \
             --resource-group "${{ env.RESOURCE_GROUP }}" \
-            --environment ndt-env \
+            --server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
+            --username "$ACR_USERNAME" \
+            --password "$ACR_PASSWORD"
+          az containerapp update \
+            --name "${{ env.FRONTEND_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
             --image "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}" \
-            --target-port 80 \
-            --ingress external \
-            --registry-server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
-            --registry-username "$ACR_USERNAME" \
-            --registry-password "$ACR_PASSWORD" \
-            --env-vars VITE_API_URL="${{ needs.deploy-backend.outputs.backend-url }}" \
-            --cpu 0.5 --memory 1.0Gi \
-            --min-replicas 1 --max-replicas 2 \
-            --query properties.configuration.ingress.fqdn --output tsv || \
-          ( az containerapp registry set \
-              --name "${{ env.FRONTEND_APP_NAME }}" \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
-              --username "$ACR_USERNAME" \
-              --password "$ACR_PASSWORD" \
-            && az containerapp update \
-              --name "${{ env.FRONTEND_APP_NAME }}" \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --image "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}" \
-              --set-env-vars VITE_API_URL="${{ needs.deploy-backend.outputs.backend-url }}" )
+            --set-env-vars VITE_API_URL="${{ needs.deploy-backend.outputs.backend-url }}"
