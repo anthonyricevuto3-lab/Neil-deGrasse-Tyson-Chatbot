@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./backend/
 
 # Copy vector store data
-COPY storage/vector_store/ ./storage/vector_store/
+# Vector store is downloaded at runtime from Azure Blob Storage
 
 EXPOSE 8000
 

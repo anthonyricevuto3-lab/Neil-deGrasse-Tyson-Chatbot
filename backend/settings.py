@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # Model Configuration
     llm_model: str = "gpt-4"
-    embedding_model: str = "text-embedding-3-small"
+    embedding_model: str = "text-embedding-3-large"
     temperature: float = 0.7
 
     # RAG Configuration

@@ -1,7 +1,7 @@
 """Sources endpoint returning training and indexed sources."""
 
 from pathlib import Path
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from backend.rag.store import load_store
 from backend.settings import get_settings
@@ -47,7 +47,7 @@ def _load_vector_store_sources() -> list[str]:
 
 
 @router.get("/sources")
-async def sources_endpoint() -> dict:
+async def sources_endpoint(indexed_only: bool = Query(False, description="If true, return only indexed vector store sources")) -> dict:
     """Return combined list of training URLs and indexed vector store sources.
 
     Response shape:
@@ -55,6 +55,11 @@ async def sources_endpoint() -> dict:
     """
     training = _load_training_urls()
     indexed = _load_vector_store_sources()
+    if indexed_only:
+        return {
+            "sources": indexed,
+            "counts": {"training": len(training), "indexed": len(indexed), "combined": len(indexed)},
+        }
     combined = list(dict.fromkeys(training + indexed))  # preserve order, remove duplicates
     return {
         "sources": combined,

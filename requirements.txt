@@ -27,8 +27,6 @@ langchain==0.1.0
 langchain-openai==0.0.2
 openai>=1.6.1,<2.0.0
 faiss-cpu==1.7.4
-sentence-transformers==2.2.2
-FlagEmbedding==1.2.10
 huggingface-hub>=0.15.0,<1.0.0
 
 # Document Processing

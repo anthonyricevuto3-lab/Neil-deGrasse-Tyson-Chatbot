@@ -9,9 +9,10 @@ on:
     types: [ published ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME_BACKEND: anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend
-  IMAGE_NAME_FRONTEND: anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/frontend
+  REGISTRY: ndtchatbotacr.azurecr.io
+  ACR_NAME: ndtchatbotacr
+  IMAGE_NAME_BACKEND: ndt-backend
+  IMAGE_NAME_FRONTEND: ndt-frontend
 
 jobs:
   build-and-push:
@@ -30,12 +31,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Log in to Container Registry
-      uses: docker/login-action@v2
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ACR Login
+      run: az acr login -n ${{ env.ACR_NAME }}
 
     - name: Extract metadata (backend)
       id: meta-backend
@@ -50,8 +52,7 @@ jobs:
         file: docker/backend.Dockerfile
         push: true
         tags: |
-          ${{ steps.meta-backend.outputs.tags }}
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:main
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ github.sha }}
         labels: ${{ steps.meta-backend.outputs.labels }}
 
     - name: Extract metadata (frontend)
@@ -67,8 +68,7 @@ jobs:
         file: docker/frontend.Dockerfile
         push: true
         tags: |
-          ${{ steps.meta-frontend.outputs.tags }}
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:main
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ github.sha }}
         labels: ${{ steps.meta-frontend.outputs.labels }}
         build-args: |
           CACHEBUST=${{ github.sha }}

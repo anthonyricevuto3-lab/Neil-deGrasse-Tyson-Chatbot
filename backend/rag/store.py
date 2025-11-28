@@ -52,8 +52,8 @@ def load_store(store_path: Path, use_cache: bool = True) -> FAISS | None:
     if use_cache and _vector_store_cache is not None:
         return _vector_store_cache
 
-    # Check if vector store exists, if not try to download from blob
-    if not (store_path / "index.faiss").exists():
+    # Ensure vector store exists locally; if not, download from blob
+    if not (store_path / "index.faiss").exists() or not (store_path / "index.pkl").exists():
         print("Vector store not found locally, attempting to download from Azure Blob Storage...")
         if not _download_vector_store_from_blob(store_path):
             print("Failed to download vector store from blob storage")
@@ -61,22 +61,45 @@ def load_store(store_path: Path, use_cache: bool = True) -> FAISS | None:
         print("Vector store downloaded successfully from blob storage")
 
     embeddings = get_embeddings()
-    try:
-        # Try with the parameter first (newer langchain versions)
-        store = FAISS.load_local(
-            str(store_path),
-            embeddings,
-            allow_dangerous_deserialization=True,
-        )
-    except TypeError:
-        # Fall back to without parameter (older versions)
-        store = FAISS.load_local(
-            str(store_path),
-            embeddings,
-        )
-    except Exception as e:
-        print(f"Error loading vector store: {e}")
+    def _load() -> FAISS | None:
+        try:
+            # Prefer newer signature
+            return FAISS.load_local(
+                str(store_path),
+                embeddings,
+                allow_dangerous_deserialization=True,
+            )
+        except TypeError:
+            # Older signature without allow_dangerous_deserialization
+            return FAISS.load_local(
+                str(store_path),
+                embeddings,
+            )
+        except Exception as e:
+            print(f"Error loading vector store: {e}")
+            return None
+
+    store = _load()
+    if store is None:
         return None
+
+    # Validate embedding dimension matches FAISS index dimension
+    try:
+        test_vec = embeddings.embed_query("dimension-check")
+        index_dim = getattr(store.index, "d", None)
+        if index_dim is not None and len(test_vec) != index_dim:
+            print(
+                f"Embedding dimension mismatch (embed={len(test_vec)} vs index={index_dim}). "
+                "Refreshing local vector store from Azure Blob Storage..."
+            )
+            # Redownload and reload (overwrite local files)
+            if _download_vector_store_from_blob(store_path):
+                store = _load()
+            else:
+                print("Redownload failed; returning None.")
+                return None
+    except Exception as e:
+        print(f"Error during embedding/index dimension validation: {e}")
 
     # Cache for future requests
     if use_cache:
