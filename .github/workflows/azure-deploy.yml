@@ -1,21 +1,21 @@
 name: Deploy to Azure Container Apps
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
       - 'backend/**'
       - 'frontend/**'
       - 'docker/**'
-      - 'storage/**'
       - '.github/workflows/azure-deploy.yml'
 
 env:
-  AZURE_CONTAINER_REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/backend
-  FRONTEND_IMAGE: ghcr.io/anthonyricevuto3-lab/neil-degrasse-tyson-chatbot/frontend
-  RESOURCE_GROUP: neil-degrasse-tyson-chatbot-rg
+  AZURE_CONTAINER_REGISTRY: ndtchatbotacr.azurecr.io
+  ACR_NAME: ndtchatbotacr
+  BACKEND_IMAGE: ndtchatbotacr.azurecr.io/ndt-backend
+  FRONTEND_IMAGE: ndtchatbotacr.azurecr.io/ndt-frontend
+  RESOURCE_GROUP: Neil-deGrasse-Tyson-Chatbot-RG
   BACKEND_APP_NAME: ndt-backend
   FRONTEND_APP_NAME: ndt-frontend
   LOCATION: westus
@@ -23,118 +23,150 @@ env:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Free up disk space (cleanup before deploy)
-      run: |
-        echo "Cleaning up disk space before deploy..."
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
-        sudo apt-get clean || true
-        df -h
-    - uses: actions/checkout@v3
-    
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Deploy Backend to Azure Container Apps
-      run: |
-        # Create resource group if it doesn't exist
-        az group create --name ${{ env.RESOURCE_GROUP }} --location ${{ env.LOCATION }} || true
-        
-        # Create container app environment if it doesn't exist
-        az containerapp env create \
-          --name ndt-env \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --location ${{ env.LOCATION }} || true
-        
-        # Deploy backend container app with registry credentials
-        az containerapp create \
-          --name ${{ env.BACKEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --environment ndt-env \
-          --image ${{ env.BACKEND_IMAGE }}:main \
-          --target-port 8000 \
-          --ingress external \
-          --registry-server ghcr.io \
-          --registry-username ${{ github.actor }} \
-          --registry-password ${{ secrets.GITHUB_TOKEN }} \
-          --env-vars \
-            OPENAI_API_KEY=secretref:openai-api-key \
-          --cpu 1.0 \
-          --memory 2.0Gi \
-          --min-replicas 1 \
-          --max-replicas 3 \
-          --secrets \
-            openai-api-key=${{ secrets.OPENAI_API_KEY }} \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv || \
-        az containerapp update \
-          --name ${{ env.BACKEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --image ${{ env.BACKEND_IMAGE }}:main
-    
-    - name: Get Backend URL
-      id: backend-url
-      run: |
-        BACKEND_URL=$(az containerapp show \
-          --name ${{ env.BACKEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv)
-        echo "url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
-        echo "Backend URL: https://$BACKEND_URL"
-    
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Ensure resource group and environment
+        run: |
+          az group create --name "${{ env.RESOURCE_GROUP }}" --location "${{ env.LOCATION }}" || true
+          az containerapp env create \
+            --name ndt-env \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --location "${{ env.LOCATION }}" || true
+
+      - name: Wait for backend image in ACR
+        run: |
+          TAG="${{ github.sha }}"
+          REPO="ndt-backend"
+          for i in {1..40}; do
+            COUNT=$(az acr repository show-tags -n "${{ env.ACR_NAME }}" --repository "$REPO" --query "[?@=='$TAG'] | length(@)" -o tsv || echo 0)
+            if [ "$COUNT" = "1" ]; then
+              echo "Found image $REPO:$TAG"
+              exit 0
+            fi
+            echo "Waiting for $REPO:$TAG in ACR ($i/40)..."
+            sleep 15
+          done
+          echo "Image $REPO:$TAG not found in ACR" >&2
+          exit 1
+
+      - name: Get ACR credentials
+        run: |
+          ADMIN_ENABLED=$(az acr show -n "${{ env.ACR_NAME }}" --query "adminUserEnabled" -o tsv)
+          if [ "$ADMIN_ENABLED" != "true" ]; then
+            az acr update -n "${{ env.ACR_NAME }}" --admin-enabled true
+          fi
+          echo "ACR_USERNAME=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"username\" -o tsv)" >> "$GITHUB_ENV"
+          echo "ACR_PASSWORD=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"passwords[0].value\" -o tsv)" >> "$GITHUB_ENV"
+
+      - name: Deploy Backend
+        id: deploy_backend
+        run: |
+          set -e
+          az containerapp create \
+            --name "${{ env.BACKEND_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --environment ndt-env \
+            --image "${{ env.BACKEND_IMAGE }}:${{ github.sha }}" \
+            --target-port 8000 \
+            --ingress external \
+            --registry-server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
+            --registry-username "$ACR_USERNAME" \
+            --registry-password "$ACR_PASSWORD" \
+            --env-vars OPENAI_API_KEY=secretref:openai-api-key \
+            --cpu 1.0 --memory 2.0Gi \
+            --min-replicas 1 --max-replicas 3 \
+            --secrets openai-api-key="${{ secrets.OPENAI_API_KEY }}" \
+            --query properties.configuration.ingress.fqdn --output tsv || \
+          ( az containerapp registry set \
+              --name "${{ env.BACKEND_APP_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
+              --username "$ACR_USERNAME" \
+              --password "$ACR_PASSWORD" \
+            && az containerapp update \
+              --name "${{ env.BACKEND_APP_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --image "${{ env.BACKEND_IMAGE }}:${{ github.sha }}" )
+
+      - name: Get Backend URL
+        id: backend_url
+        run: |
+          BACKEND_URL=$(az containerapp show \
+            --name "${{ env.BACKEND_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          echo "url=https://$BACKEND_URL" >> "$GITHUB_OUTPUT"
+
     outputs:
-      backend-url: ${{ steps.backend-url.outputs.url }}
+      backend-url: ${{ steps.backend_url.outputs.url }}
 
   deploy-frontend:
     runs-on: ubuntu-latest
     needs: deploy-backend
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Deploy Frontend to Azure Container Apps
-      run: |
-        # Deploy frontend container app with registry credentials
-        az containerapp create \
-          --name ${{ env.FRONTEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --environment ndt-env \
-          --image ${{ env.FRONTEND_IMAGE }}:main \
-          --target-port 80 \
-          --ingress external \
-          --registry-server ghcr.io \
-          --registry-username ${{ github.actor }} \
-          --registry-password ${{ secrets.GITHUB_TOKEN }} \
-          --env-vars \
-            VITE_API_URL=${{ needs.deploy-backend.outputs.backend-url }} \
-          --cpu 0.5 \
-          --memory 1.0Gi \
-          --min-replicas 1 \
-          --max-replicas 2 \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv || \
-        az containerapp update \
-          --name ${{ env.FRONTEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --image ${{ env.FRONTEND_IMAGE }}:main \
-          --set-env-vars \
-            VITE_API_URL=${{ needs.deploy-backend.outputs.backend-url }}
-    
-    - name: Get Frontend URL
-      run: |
-        FRONTEND_URL=$(az containerapp show \
-          --name ${{ env.FRONTEND_APP_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv)
-        echo "🚀 Frontend deployed to: https://$FRONTEND_URL"
-        echo "🔗 Backend API: ${{ needs.deploy-backend.outputs.backend-url }}"
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Wait for frontend image in ACR
+        run: |
+          TAG="${{ github.sha }}"
+          REPO="ndt-frontend"
+          for i in {1..40}; do
+            COUNT=$(az acr repository show-tags -n "${{ env.ACR_NAME }}" --repository "$REPO" --query "[?@=='$TAG'] | length(@)" -o tsv || echo 0)
+            if [ "$COUNT" = "1" ]; then
+              echo "Found image $REPO:$TAG"
+              exit 0
+            fi
+            echo "Waiting for $REPO:$TAG in ACR ($i/40)..."
+            sleep 15
+          done
+          echo "Image $REPO:$TAG not found in ACR" >&2
+          exit 1
+
+      - name: Get ACR credentials
+        run: |
+          ADMIN_ENABLED=$(az acr show -n "${{ env.ACR_NAME }}" --query "adminUserEnabled" -o tsv)
+          if [ "$ADMIN_ENABLED" != "true" ]; then
+            az acr update -n "${{ env.ACR_NAME }}" --admin-enabled true
+          fi
+          echo "ACR_USERNAME=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"username\" -o tsv)" >> "$GITHUB_ENV"
+          echo "ACR_PASSWORD=$(az acr credential show -n \"${{ env.ACR_NAME }}\" --query \"passwords[0].value\" -o tsv)" >> "$GITHUB_ENV"
+
+      - name: Deploy Frontend
+        run: |
+          set -e
+          az containerapp create \
+            --name "${{ env.FRONTEND_APP_NAME }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --environment ndt-env \
+            --image "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}" \
+            --target-port 80 \
+            --ingress external \
+            --registry-server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
+            --registry-username "$ACR_USERNAME" \
+            --registry-password "$ACR_PASSWORD" \
+            --env-vars VITE_API_URL="${{ needs.deploy-backend.outputs.backend-url }}" \
+            --cpu 0.5 --memory 1.0Gi \
+            --min-replicas 1 --max-replicas 2 \
+            --query properties.configuration.ingress.fqdn --output tsv || \
+          ( az containerapp registry set \
+              --name "${{ env.FRONTEND_APP_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
+              --username "$ACR_USERNAME" \
+              --password "$ACR_PASSWORD" \
+            && az containerapp update \
+              --name "${{ env.FRONTEND_APP_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --image "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}" \
+              --set-env-vars VITE_API_URL="${{ needs.deploy-backend.outputs.backend-url }}" )
