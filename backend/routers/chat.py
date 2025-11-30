@@ -8,6 +8,7 @@ from backend.models.schemas import ChatRequest, ChatResponse
 from backend.rag.pipelines import rag_pipeline
 from backend.services.guardrails import check_scope
 from backend.services.llm import generate_response
+from backend.llm.provider import generate_chat
 from backend.services.telemetry import log_request
 
 router = APIRouter()
@@ -50,11 +51,18 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
         # Run RAG pipeline
         context = await rag_pipeline(request.message)
 
-        # Generate response
-        response = await generate_response(
-            question=request.message,
-            context=context,
-        )
+        # Generate response using provider abstraction (Claude Haiku 4.5 by default)
+        # Combine user message with retrieved context
+        prompt = f"Use the context to answer.\n\nContext:\n{context}\n\nQuestion: {request.message}"
+        answer_text = generate_chat([
+            {"role": "user", "content": prompt}
+        ], max_tokens=800)
+
+        response = {
+            "answer": answer_text,
+            "sources": [],
+            "metadata": {"provider": "model"}
+        }
 
         return ChatResponse(
             response=response["answer"],

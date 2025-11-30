@@ -79,9 +79,11 @@ jobs:
             --registry-username "$ACR_USERNAME" \
             --registry-password "$ACR_PASSWORD" \
             --env-vars OPENAI_API_KEY=secretref:openai-api-key \
+            --env-vars ANTHROPIC_API_KEY=secretref:anthropic-api-key \
             --cpu 1.0 --memory 2.0Gi \
             --min-replicas 1 --max-replicas 3 \
             --secrets openai-api-key="${{ secrets.OPENAI_API_KEY }}" \
+            --secrets anthropic-api-key="${{ secrets.ANTHROPIC_API_KEY }}" \
             --query properties.configuration.ingress.fqdn --output tsv || \
           ( az containerapp registry set \
               --name "${{ env.BACKEND_APP_NAME }}" \
