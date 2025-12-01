@@ -1,4 +1,48 @@
 {
+  "responseOverrides": {
+    "headers": {
+      "cache-control": "no-cache, no-store, must-revalidate",
+      "pragma": "no-cache",
+      "expires": "0"
+    },
+    "routes": [
+      {
+        "route": "/",
+        "headers": {
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0"
+        }
+      },
+      {
+        "route": "/index.html",
+        "headers": {
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0"
+        }
+      },
+      {
+        "route": "/assets/*",
+        "headers": {
+          "cache-control": "public, max-age=300"
+        }
+      },
+      {
+        "route": "/assets/**/*.js",
+        "headers": {
+          "cache-control": "public, max-age=300"
+        }
+      },
+      {
+        "route": "/assets/**/*.css",
+        "headers": {
+          "cache-control": "public, max-age=300"
+        }
+      }
+    ]
+  }
+}{
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]
