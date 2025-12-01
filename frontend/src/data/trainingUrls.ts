@@ -1,0 +1,105 @@
+// Training URLs used for the NDT chatbot
+export const TRAINING_URLS = [
+  // Podcast Transcripts
+  "https://tim.blog/2019/10/15/neil-degrasse-tyson-transcript/",
+  "https://podcasts.happyscribe.com/smartless/neil-degrasse-tyson",
+  "https://singjupost.com/transcript-astrophysicist-neil-degrasse-tyson-on-joe-rogan-podcast-1159/",
+  "https://smashnotes.com/p/the-joe-rogan-experience/e/1347-neil-degrasse-tyson/transcript",
+  "https://singjupost.com/transcript-the-brutal-truth-about-astrology-neil-degrasse-tyson-on-doac-podcast/",
+  "https://freakonomics.com/podcast/neil-degrasse-tyson-is-still-starstruck/",
+  
+  // Official Transcripts & Interviews
+  "https://www.rev.com/transcripts/neil-degrasse-tyson-answers-artemis-i-questions-transcript",
+  "https://app.podscribe.com/series/372",
+  
+  // Reddit AMA
+  "https://amatranscripts.com/ama/neil_degrasse_tyson_2017-04-02.html",
+  "https://amatranscripts.com/ama/neil_degrasse_tyson_2011-11-13.html",
+  
+  // PBS NOVA Transcripts
+  "https://www.pbs.org/wgbh/nova/transcripts/3111_origins.html",
+  "https://www.pbs.org/wgbh/nova/transcripts/3112_origins.html",
+  "https://www.pbs.org/wgbh/nova/transcripts/3113_origins.html",
+  "https://www.pbs.org/wgbh/nova/transcripts/3114_origins.html",
+  "https://www.pbs.org/wgbh/nova/transcripts/3401_sciencen.html",
+  "https://www.pbs.org/wgbh/nova/transcripts/3411_sciencen.html",
+  "https://www.pbs.org/wgbh/nova/origins/tyson.html",
+  
+  // CNN Transcripts
+  "https://transcripts.cnn.com/show/fzgps/date/2017-09-17/segment/01",
+  "https://transcripts.cnn.com/show/fzgps/date/2014-08-10/segment/01",
+  "https://transcripts.cnn.com/show/wtcw/date/2023-02-05/segment/01",
+  "https://transcripts.cnn.com/show/se/date/2003-08-26/segment/18",
+  "https://transcripts.cnn.com/show/ctmo/date/2024-10-30/segment/04",
+  "https://transcripts.cnn.com/show/fzgps/date/2012-04-01/segment/01",
+  "https://transcripts.cnn.com/show/fzgps/date/2017-05-07/segment/01",
+  "https://transcripts.cnn.com/show/fzgps/date/2013-03-24/segment/01",
+  "https://transcripts.cnn.com/show/fzgps?start_fileid=fzgps_2018-01-07_01",
+  "https://transcripts.cnn.com/show/se?start_fileid=se_2003-09-03_01",
+  "https://transcripts.cnn.com/show/cnr/date/2023-09-24/segment/05",
+  "https://transcripts.cnn.com/show/fzgps/date/2021-07-11/segment/01",
+  
+  // Speeches & Commencements
+  "https://apps.npr.org/commencement/speech/neil-degrasse-tyson-rice-university-2013/",
+  "https://whatrocks.github.io/commencement-db/2015-neil-degrasse-tyson-university-of-massachusetts%2C-amherst/",
+  "https://speakola.com/ideas/neil-degrasse-tyson-science-in-america-2017",
+  "https://neildegrassetyson.com/commentary/2017-04-21-science-in-america/",
+  
+  // YouTube Transcripts
+  "https://ytscribe.com/v/dXOLJOnLKDg",
+  "https://ytscribe.com/th/v/MtQ0qxyf-Ds",
+  
+  // Articles & Commentary
+  "https://www.pbs.org/wgbh/nova/space/notes-pluto.html",
+  "https://billmoyers.com/2014/01/28/part-three-interview-highlights-neil-degrasse-tyson-on-science-literacy/",
+  
+  // Point of Inquiry Interviews
+  "https://pointofinquiry.org/2011/02/neil_degrasse_tyson_communicating_science/",
+  "https://pointofinquiry.org/2013/07/neil_degrasse_tyson_communicating_science_to_the_public2013/",
+  "https://pointofinquiry.org/2009/03/neil_degrasse_tyson_-_the_pluto_files/",
+  "https://pointofinquiry.org/2007/01/neil_degrasse_tyson_death_by_black_hole/",
+  
+  // Podcast Series
+  "https://freakonomics.com/series-full/people-i-mostly-admire/",
+  "https://startalkmedia.com/show/",
+  "https://art19.com/shows/tim-ferriss-show",
+  
+  // Extended YouTube Transcript Sources
+  "https://youtubetranscript.com/?v=dXOLJOnLKDg",
+  "https://youtubetranscript.com/?v=MtQ0qxyf-Ds",
+  "https://youtubetranscript.com/?v=QdLhEszs0rQ",
+  "https://youtubetranscript.com/?v=32u2Te6pJio",
+  "https://youtubetranscript.com/?v=pAJZ_-iv0SA",
+  "https://youtubetranscript.com/?v=z-u5ul4iXZE",
+  "https://youtubetranscript.com/?v=dpGgz4OZsHA",
+  "https://youtubetranscript.com/?v=1KO9W2lETAQ",
+  
+  // YouTube Video References
+  "https://www.youtube.com/watch?v=dXOLJOnLKDg",
+  "https://www.youtube.com/watch?v=MtQ0qxyf-Ds",
+  "https://www.youtube.com/watch?v=DJIP7PZxXTM",
+  "https://www.youtube.com/watch?v=47pZZxgkEEw",
+  "https://www.youtube.com/watch?v=QdLhEszs0rQ",
+  "https://www.youtube.com/watch?v=32u2Te6pJio",
+  "https://www.youtube.com/watch?v=pAJZ_-iv0SA",
+  "https://www.youtube.com/watch?v=Gb3ik7vWnls",
+  "https://www.youtube.com/watch?v=z-u5ul4iXZE",
+  "https://www.youtube.com/watch?v=dpGgz4OZsHA",
+  "https://www.youtube.com/watch?v=1KO9W2lETAQ",
+  "https://www.youtube.com/watch?v=8grZg4xkYtE",
+  "https://www.youtube.com/watch?v=2Txq8Yg7d0w",
+  "https://www.youtube.com/watch?v=x23xXfHhhCI",
+  "https://www.youtube.com/watch?v=IJKJfYx_aJo",
+  
+  // StarTalk Topic Pages
+  "https://startalkmedia.com/topics/science/",
+  "https://startalkmedia.com/topics/cosmos/",
+  "https://startalkmedia.com/topics/space/",
+  "https://startalkmedia.com/topics/astronomy/",
+  "https://startalkmedia.com/topics/astrophysics/",
+  "https://startalkmedia.com/topics/physics/",
+  "https://startalkmedia.com/topics/cosmology/",
+  "https://startalkmedia.com/topics/technology/",
+  "https://startalkmedia.com/topics/engineering/",
+  "https://startalkmedia.com/topics/ai/",
+];

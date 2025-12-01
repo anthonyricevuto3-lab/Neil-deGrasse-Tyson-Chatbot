@@ -2,6 +2,9 @@ FROM node:20-alpine AS builder
 
 # Bust cache
 ARG CACHEBUST=1
+# API base URL for Vite build-time env
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
 
 WORKDIR /app
 

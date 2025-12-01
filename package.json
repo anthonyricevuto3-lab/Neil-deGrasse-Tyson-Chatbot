@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "path-browserify": "^1.0.1"
+  }
+}
