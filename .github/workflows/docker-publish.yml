@@ -54,6 +54,7 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ github.sha }}
         labels: ${{ steps.meta-backend.outputs.labels }}
+        no-cache: true
 
     - name: Extract metadata (frontend)
       id: meta-frontend
@@ -72,4 +73,5 @@ jobs:
         labels: ${{ steps.meta-frontend.outputs.labels }}
         build-args: |
           CACHEBUST=${{ github.sha }}
+          VITE_API_URL=https://ndt-backend.politeforest-c8151342.westus.azurecontainerapps.io/api
         no-cache: true
