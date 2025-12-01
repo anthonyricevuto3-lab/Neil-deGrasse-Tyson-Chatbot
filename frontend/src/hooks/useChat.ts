@@ -20,7 +20,14 @@ export function useChat() {
         headers: { 'Content-Type': 'application/json' },
         body: payload
       })
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+      if (!resp.ok) {
+        let detail = `HTTP ${resp.status}`
+        try {
+          const body = await resp.json()
+          if (body?.detail) detail = body.detail
+        } catch {/* ignore parse errors */}
+        throw new Error(detail)
+      }
       return resp.json()
     }
 
@@ -48,9 +55,9 @@ export function useChat() {
         response: data.response || data.answer || 'No response from the server',
         sources: data.sources || []
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling API:', error)
-      throw error
+      throw new Error(error?.message || 'Request failed')
     } finally {
       setIsLoading(false)
     }

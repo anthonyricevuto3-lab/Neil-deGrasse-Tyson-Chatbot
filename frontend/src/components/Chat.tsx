@@ -46,14 +46,13 @@ export default function Chat({ onNewSources }: ChatProps) {
       }
 
       setMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error)
-      
+      const msg = error?.message || 'Sorry, something went wrong. Please try again.'
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.'
+        content: msg
       }
-      
       setMessages(prev => [...prev, errorMessage])
     }
   }
