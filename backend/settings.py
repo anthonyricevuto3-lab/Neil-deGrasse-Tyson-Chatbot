@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
 
     # Model Configuration
-    llm_model: str = "claude-3-haiku-4.5"
-    model_provider: str = "anthropic"  # "anthropic" or "openai"
+    llm_model: str = "gpt-4o-mini"
+    model_provider: str = "openai"  # "anthropic" or "openai"
     embedding_model: str = "text-embedding-3-large"
     temperature: float = 0.7
 
