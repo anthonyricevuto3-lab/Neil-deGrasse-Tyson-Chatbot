@@ -19,14 +19,16 @@ export default function Message({ message }: MessageProps) {
 
   return (
     <div className={`message ${isUser ? 'message-user' : 'message-assistant'}`}>
-      <img 
-        src={isUser ? USER_AVATAR : NDT_AVATAR}
-        alt={isUser ? 'User' : 'Neil deGrasse Tyson'}
-        className="message-avatar"
-        onError={(e) => {
-          e.currentTarget.src = 'https://ui-avatars.com/api/?name=NDT&background=e94560&color=fff&size=128&bold=true'
-        }}
-      />
+      {!isUser && (
+        <img
+          src={NDT_AVATAR}
+          alt={'Neil deGrasse Tyson'}
+          className="message-avatar"
+          onError={(e) => {
+            e.currentTarget.src = 'https://ui-avatars.com/api/?name=NDT&background=e94560&color=fff&size=128&bold=true'
+          }}
+        />
+      )}
       <div className="message-content">
         {isUser ? (
           <p>{message.content}</p>

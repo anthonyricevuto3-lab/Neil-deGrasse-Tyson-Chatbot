@@ -33,7 +33,9 @@ class Settings(BaseSettings):
     cors_origins: list[str] = [
         "http://localhost:3000", 
         "http://localhost:5173",
-        "https://polite-sand-06dd6b31e.3.azurestaticapps.net"
+        "https://polite-sand-06dd6b31e.3.azurestaticapps.net",
+        "https://neil-degrasse-tyson-ai-chatbot.com",
+        "https://www.neil-degrasse-tyson-ai-chatbot.com",
     ]
 
     # Logging
