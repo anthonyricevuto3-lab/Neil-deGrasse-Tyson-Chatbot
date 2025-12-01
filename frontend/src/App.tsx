@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Chat from './components/Chat'
 import Sources from './components/Sources'
-import { TRAINING_URLS } from './data/trainingUrls'
+import { TRAINING_URLS } from './data/trainingUrls.ts'
 import './styles/App.css'
 // Single source of truth: use training URLs list
 const ALLOWED_SOURCES = TRAINING_URLS
