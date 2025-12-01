@@ -22,7 +22,7 @@ async def chat_get_help():
     """
     return JSONResponse(
         {
-            "detail": "Use POST /chat with JSON body {'message': '<your question>'}",
+            "detail": "Use POST /api/chat with JSON body {'message': '<your question>'}",
             "example": {"message": "What is a neutron star?"},
             "schema": {"message": "string"},
         }
