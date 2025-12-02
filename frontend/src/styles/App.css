@@ -14,7 +14,7 @@ body, html {
   min-height: 100vh;
   background:
     linear-gradient(135deg, #0a0a23 0%, #1a1a2e 60%, #2d2dff 100%),
-    url('../src/photos/_MG_1802_Original.jpg') center center / cover no-repeat;
+    url('../photos/_MG_1802_Original.jpg') center center / cover no-repeat;
   background-blend-mode: lighten, normal;
   overflow: hidden;
 }
