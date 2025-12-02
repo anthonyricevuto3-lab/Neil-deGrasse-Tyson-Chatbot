@@ -1,6 +1,7 @@
 """Application settings using Pydantic."""
 
 from functools import lru_cache
+import os
 
 from pydantic_settings import BaseSettings
 
@@ -53,4 +54,11 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
-    return Settings()
+    settings = Settings()
+    # Optional: allow overriding CORS via env var CORS_ORIGINS (comma-separated)
+    cors_env = os.getenv("CORS_ORIGINS")
+    if cors_env:
+        origins = [o.strip() for o in cors_env.split(",") if o.strip()]
+        if origins:
+            settings.cors_origins = origins
+    return settings
