@@ -23,6 +23,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Fallback middleware: inject CORS headers if for any reason CORSMiddleware omitted them.
+@app.middleware("http")
+async def ensure_cors_headers(request, call_next):
+    response = await call_next(request)
+    origin = request.headers.get("origin")
+    if origin and origin in settings.cors_origins:
+        # If CORSMiddleware failed to attach headers (observed missing Access-Control-Allow-Origin), add them.
+        if "access-control-allow-origin" not in {k.lower(): v for k, v in response.headers.items()}:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
 # Mount routers
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
