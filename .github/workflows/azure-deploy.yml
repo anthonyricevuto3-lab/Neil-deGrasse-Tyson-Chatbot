@@ -77,6 +77,7 @@ jobs:
         id: deploy_backend
         run: |
           set -e
+          # Try create first; if it exists, update will be used
           az containerapp create \
             --name "${{ env.BACKEND_APP_NAME }}" \
             --resource-group "${{ env.RESOURCE_GROUP }}" \
@@ -92,18 +93,23 @@ jobs:
             --min-replicas 1 --max-replicas 3 \
             --secrets openai-api-key="${{ secrets.OPENAI_API_KEY }}" \
             --secrets anthropic-api-key="${{ secrets.ANTHROPIC_API_KEY }}" \
-            --query properties.configuration.ingress.fqdn --output tsv || \
-          ( az containerapp registry set \
+            --query properties.configuration.ingress.fqdn --output tsv 2>/dev/null || \
+          ( echo "App exists, updating...";
+            az containerapp registry set \
               --name "${{ env.BACKEND_APP_NAME }}" \
               --resource-group "${{ env.RESOURCE_GROUP }}" \
               --server "${{ env.AZURE_CONTAINER_REGISTRY }}" \
               --username "$ACR_USERNAME" \
-              --password "$ACR_PASSWORD" \
-            && az containerapp update \
+              --password "$ACR_PASSWORD" && \
+            az containerapp secret set \
+              --name "${{ env.BACKEND_APP_NAME }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --secrets openai-api-key="${{ secrets.OPENAI_API_KEY }}" anthropic-api-key="${{ secrets.ANTHROPIC_API_KEY }}" && \
+            az containerapp update \
               --name "${{ env.BACKEND_APP_NAME }}" \
               --resource-group "${{ env.RESOURCE_GROUP }}" \
               --image "${{ env.BACKEND_IMAGE }}:${{ github.sha }}" \
-              --set-env-vars CORS_ORIGINS="https://neil-degrasse-tyson-ai-chatbot.com,https://www.neil-degrasse-tyson-ai-chatbot.com,https://polite-sand-06dd6b31e.3.azurestaticapps.net" )
+              --set-env-vars OPENAI_API_KEY=secretref:openai-api-key ANTHROPIC_API_KEY=secretref:anthropic-api-key CORS_ORIGINS="https://neil-degrasse-tyson-ai-chatbot.com,https://www.neil-degrasse-tyson-ai-chatbot.com,https://polite-sand-06dd6b31e.3.azurestaticapps.net" )
 
       - name: Get Backend URL
         id: backend_url
