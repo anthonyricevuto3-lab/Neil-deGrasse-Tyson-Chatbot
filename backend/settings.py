@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # API Keys
     openai_api_key: str
-    anthropic_api_key: str | None = None
+    anthropic_api_key: str | None = None  # Optional, only needed if using Anthropic provider
 
     # Model Configuration
     llm_model: str = "gpt-4o-mini"
