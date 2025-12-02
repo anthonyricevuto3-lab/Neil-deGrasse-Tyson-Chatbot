@@ -14,3 +14,12 @@ async def debug_llm():
         "openai_key_present": bool(settings.openai_api_key),
         "anthropic_key_present": bool(settings.anthropic_api_key),
     }
+
+
+@router.get("/debug/cors")
+async def debug_cors():
+    """Return current CORS origins from server config."""
+    settings = get_settings()
+    return {
+        "cors_origins": settings.cors_origins,
+    }

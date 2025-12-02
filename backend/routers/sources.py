@@ -8,6 +8,12 @@ from backend.settings import get_settings
 
 router = APIRouter()
 
+@router.options("/sources")
+async def sources_options():
+    """Handle CORS preflight for /sources."""
+    from fastapi.responses import JSONResponse
+    return JSONResponse(status_code=204, content=None)
+
 
 def _load_training_urls() -> list[str]:
     """Parse the training_urls.txt file collecting all HTTP/HTTPS lines.
