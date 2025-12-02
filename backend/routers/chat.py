@@ -14,6 +14,13 @@ from backend.services.telemetry import log_request
 router = APIRouter()
 
 
+@router.options("/chat")
+async def chat_options():
+    """Handle CORS preflight for /chat."""
+    # FastAPI/Starlette CORSMiddleware will attach the proper CORS headers.
+    return JSONResponse(status_code=204, content=None)
+
+
 @router.get("/chat")
 async def chat_get_help():
     """Helper for accidental GET requests to /chat.
