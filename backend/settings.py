@@ -31,13 +31,7 @@ class Settings(BaseSettings):
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    cors_origins: list[str] = [
-        "http://localhost:3000", 
-        "http://localhost:5173",
-        "https://polite-sand-06dd6b31e.3.azurestaticapps.net",
-        "https://neil-degrasse-tyson-ai-chatbot.com",
-        "https://www.neil-degrasse-tyson-ai-chatbot.com",
-    ]
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://polite-sand-06dd6b31e.3.azurestaticapps.net,https://neil-degrasse-tyson-ai-chatbot.com,https://www.neil-degrasse-tyson-ai-chatbot.com"
 
     # Logging
     log_level: str = "INFO"
@@ -55,10 +49,12 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Get cached settings instance."""
     settings = Settings()
-    # Optional: allow overriding CORS via env var CORS_ORIGINS (comma-separated)
-    cors_env = os.getenv("CORS_ORIGINS")
-    if cors_env:
-        origins = [o.strip() for o in cors_env.split(",") if o.strip()]
-        if origins:
-            settings.cors_origins = origins
     return settings
+
+
+def get_cors_origins() -> list[str]:
+    """Parse CORS origins from settings."""
+    settings = get_settings()
+    if isinstance(settings.cors_origins, str):
+        return [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+    return settings.cors_origins

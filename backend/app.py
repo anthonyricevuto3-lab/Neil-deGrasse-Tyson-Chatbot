@@ -4,9 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routers import chat, health, search, sources, debug
-from backend.settings import get_settings
+from backend.settings import get_settings, get_cors_origins
 
 settings = get_settings()
+cors_origins = get_cors_origins()
 
 app = FastAPI(
     title="NDT Bot API",
@@ -17,7 +18,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +29,7 @@ app.add_middleware(
 async def ensure_cors_headers(request, call_next):
     response = await call_next(request)
     origin = request.headers.get("origin")
-    if origin and origin in settings.cors_origins:
+    if origin and origin in cors_origins:
         # If CORSMiddleware failed to attach headers (observed missing Access-Control-Allow-Origin), add them.
         if "access-control-allow-origin" not in {k.lower(): v for k, v in response.headers.items()}:
             response.headers["Access-Control-Allow-Origin"] = origin

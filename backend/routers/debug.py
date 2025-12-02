@@ -1,7 +1,7 @@
 """Debug endpoints for verifying LLM/provider configuration at runtime."""
 
 from fastapi import APIRouter
-from backend.settings import get_settings
+from backend.settings import get_settings, get_cors_origins
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ async def debug_llm():
 @router.get("/debug/cors")
 async def debug_cors():
     """Return current CORS origins from server config."""
-    settings = get_settings()
     return {
-        "cors_origins": settings.cors_origins,
+        "cors_origins": get_cors_origins(),
+        "cors_origins_raw": get_settings().cors_origins,
     }
