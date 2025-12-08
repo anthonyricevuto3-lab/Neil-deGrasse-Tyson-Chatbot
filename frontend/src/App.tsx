@@ -69,7 +69,7 @@ function App() {
           </Routes>
         </main>
         <footer className="app-footer space-glass">
-          <p>🌌 Powered by RAG • All responses grounded in NDT's writings and interviews</p>
+          <p>🌌 Powered by OpenAI & RAG • All responses grounded in NDT's writings and interviews</p>
         </footer>
       </div>
     </BrowserRouter>
