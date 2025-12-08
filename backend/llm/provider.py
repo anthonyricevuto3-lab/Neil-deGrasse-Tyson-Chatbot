@@ -31,7 +31,10 @@ def generate_chat(messages: List[Dict[str, str]], max_tokens: int = 1024) -> str
             txt = getattr(blk, "text", None)
             if isinstance(txt, str):
                 parts.append(txt)
-        return "\n".join(parts) if parts else str(resp)
+        if parts:
+            return "\n".join(parts)
+        # Fallback: try to get any text from response object
+        return getattr(resp, "text", None) or "Error: Unable to extract response from model."
 
     if provider == "openai" and OpenAI is not None and settings.openai_api_key:
         client = OpenAI(api_key=settings.openai_api_key)
@@ -41,7 +44,10 @@ def generate_chat(messages: List[Dict[str, str]], max_tokens: int = 1024) -> str
             temperature=settings.temperature,
             max_tokens=max_tokens,
         )
-        return completion.choices[0].message.content or ""
+        content = completion.choices[0].message.content
+        if content is None or not isinstance(content, str):
+            return "Error: Model returned empty or invalid response."
+        return content
 
     # Fallback: return simple string if neither provider configured
     return "Model provider not configured or SDK missing."

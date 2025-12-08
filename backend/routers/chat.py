@@ -65,6 +65,11 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
             {"role": "user", "content": prompt}
         ], max_tokens=800)
 
+        # Ensure answer_text is a string
+        if not isinstance(answer_text, str):
+            print(f"Warning: answer_text is not a string: {type(answer_text)}")
+            answer_text = str(answer_text) if answer_text else "Error: Invalid response format from model."
+
         response = {
             "answer": answer_text,
             "sources": [],
