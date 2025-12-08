@@ -51,8 +51,15 @@ export function useChat() {
         }
       }
 
+      // Validate response is a string
+      let response = data.response || data.answer || 'No response from the server'
+      if (typeof response !== 'string') {
+        console.warn('Response was not a string:', typeof response, response)
+        response = String(response || 'Error: Invalid response format')
+      }
+
       return {
-        response: data.response || data.answer || 'No response from the server',
+        response,
         sources: data.sources || []
       }
     } catch (error: any) {

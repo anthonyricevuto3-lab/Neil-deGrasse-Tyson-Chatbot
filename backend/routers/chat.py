@@ -61,14 +61,24 @@ async def chat_endpoint(request: ChatRequest) -> ChatResponse:
         # Generate response using provider abstraction (Claude Haiku 4.5 by default)
         # Combine user message with retrieved context
         prompt = f"Use the context to answer.\n\nContext:\n{context}\n\nQuestion: {request.message}"
-        answer_text = generate_chat([
-            {"role": "user", "content": prompt}
-        ], max_tokens=800)
+        
+        try:
+            answer_text = generate_chat([
+                {"role": "user", "content": prompt}
+            ], max_tokens=800)
+        except Exception as gen_err:
+            print(f"ERROR in generate_chat: {gen_err}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"LLM error: {str(gen_err)}")
 
         # Ensure answer_text is a string
         if not isinstance(answer_text, str):
-            print(f"Warning: answer_text is not a string: {type(answer_text)}")
-            answer_text = str(answer_text) if answer_text else "Error: Invalid response format from model."
+            import traceback
+            print(f"ERROR: answer_text is not a string: {type(answer_text)}")
+            print(f"Value: {answer_text}")
+            traceback.print_exc()
+            answer_text = "Error: Invalid response format from model (see logs)."
 
         response = {
             "answer": answer_text,
