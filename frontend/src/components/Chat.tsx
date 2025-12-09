@@ -16,12 +16,21 @@ interface ChatProps {
 export default function Chat({ onNewSources }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
+  const [validation, setValidation] = useState('')
   const { sendMessage, isLoading } = useChat()
+
+  const MAX_CHARS = 900 // Backend enforces max_length=1000; keep buffer for prompt construction
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!input.trim() || isLoading) return
+    if (input.length > MAX_CHARS) {
+      setValidation(`Please keep questions under ${MAX_CHARS} characters (currently ${input.length}).`)
+      return
+    }
+
+    setValidation('')
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -96,11 +105,21 @@ export default function Chat({ onNewSources }: ChatProps) {
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value
+            if (val.length <= MAX_CHARS) {
+              setInput(val)
+              setValidation('')
+            }
+            // Hard stop at MAX_CHARS - no further input allowed
+          }}
           placeholder="Ask a question..."
           disabled={isLoading}
           className="chat-input"
+          maxLength={MAX_CHARS}
         />
+        <div className="char-counter">{input.length}/{MAX_CHARS}</div>
+        {validation && <div className="validation-text">{validation}</div>}
         <button 
           type="submit" 
           disabled={isLoading || !input.trim()}

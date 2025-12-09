@@ -100,6 +100,7 @@
   background: rgba(26, 26, 46, 0.8);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   align-items: center;
+  position: relative;
 }
 
 .chat-input {
@@ -137,6 +138,22 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+}
+
+.char-counter {
+  position: absolute;
+  right: 9rem;
+  bottom: 1rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.validation-text {
+  position: absolute;
+  left: 2rem;
+  bottom: 0.4rem;
+  font-size: 0.9rem;
+  color: #ff9f43;
 }
 
 .chat-submit:hover:not(:disabled) {

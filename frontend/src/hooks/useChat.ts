@@ -20,14 +20,37 @@ export function useChat() {
         headers: { 'Content-Type': 'application/json' },
         body: payload
       })
+
       if (!resp.ok) {
-        let detail = `HTTP ${resp.status}`
+        let detail: string = `HTTP ${resp.status}`
         try {
           const body = await resp.json()
-          if (body?.detail) detail = body.detail
-        } catch {/* ignore parse errors */}
+          const rawDetail = body?.detail
+
+          if (Array.isArray(rawDetail)) {
+            // FastAPI validation errors arrive as an array; surface the message text
+            const msgs = rawDetail
+              .map((d: any) => (typeof d?.msg === 'string' ? d.msg : null))
+              .filter(Boolean)
+            if (msgs.length > 0) detail = msgs.join('; ')
+          } else if (typeof rawDetail === 'string') {
+            detail = rawDetail
+          } else if (rawDetail) {
+            // Fallback stringification for unexpected shapes
+            detail = JSON.stringify(rawDetail)
+          }
+        } catch {
+          // ignore parse errors; keep default detail
+        }
+
+        // Specific hint for request size violations
+        if (resp.status === 422 && detail.includes('at most 1000')) {
+          detail = 'Please keep questions under 1000 characters.'
+        }
+
         throw new Error(detail)
       }
+
       return resp.json()
     }
 
